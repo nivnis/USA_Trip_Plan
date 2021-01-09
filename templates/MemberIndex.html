@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" id=fullheight>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='Styles/Main.css') }}">
+    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='Styles/MemberIndex.css') }}"> -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='Styles/Autocomplete.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='Styles/Signup.css') }}">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+
+    <script src="{{ url_for('static',filename='Scripts/ModalExit.js') }}" async></script>
+    <script src="{{ url_for('static',filename='Scripts/Requests.js')}}" async></script>
+    <script src="{{ url_for('static',filename='Scripts/MemberIndex.js') }}" async></script>
+    <script src="{{ url_for('static',filename='Scripts/FlowManager.js') }}" async></script>
+    <script src="{{ url_for('static',filename='Scripts/Index.js') }}" async></script>
+    <!-- <script src="{{ url_for('static',filename='Scripts/Dashboard.js') }}" async></script> -->
+
+    <title>My USA Trip Plan</title>
+  </head>
+
+  <div id="TopTripsDiv" class="modal">
+    <span onclick="document.getElementById('TopTripsDiv').style.display='none'" class="close" title="Close Modal">&times;</span>        
+    <div id="signupForm" class="modal-content animate">
+      <div class="container">
+        <h3 id="PopularHeadline"></h3>
+        <div id="accordionContainer"></div>                
+      </div>
+    </div>        
+  </div>
+
+  <!-- navbar here -->
+  <nav class="navbar navbar-expand-md navbar-light" style="background-color: #f1f0f0;">
+    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('memberIndex') }}">Start new trip</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="document.getElementById('TopTripsDiv').style.display='block'">Popular Trip Plans</a>
+          </li>
+        </ul>
+    </div>
+    <div class="mx-auto order-0">
+        <a id="mainHeadline" class="navbar-brand mx-auto" href="{{ url_for('memberIndex')}}">My USA Trip Plan</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+        <ul class="navbar-nav ml-auto">
+              <li class="nav-item">               
+                <a class="nav-link"  href="{{ url_for('dashboard') }}">Dashnoard</a>
+            </li>    
+            <li class="nav-item">
+                <a id="logout" class="nav-link" href="{{ url_for('home') }}" onclick="localStorage.clear()">Log Out</a>
+            </li>
+        </ul>
+    </div>
+  </nav>  
+
+  <body>      
+    <div class="container-fluid rounded whole-container text-center">
+      <div id=main-row class="row justify-content-center my-row">
+          <!-- Left side bar -->
+          <div class="col-3 justify-content-center my-col" style="height: 90%; overflow:auto;">
+            <div class="container">
+              <div id="trip-header">
+                <h4>Plan your trip</h4>
+                <img src="{{ url_for('static',filename='Pictures/roadtrip.jpg') }}" width="100%" height="50%">
+                <br>
+              </div>
+              <div id="trip-locations">
+                <form autocomplete="off" action="#">
+                  <div class="autocomplete" style="width:100%;">
+                    <h5>STARTING FROM</h5>
+                    <input id="sourceCountry" type="text" name="myCountry" placeholder="City">
+                    <ul id="startCities"></ul>
+                    <h5>LAST DESTINATION</h5>
+                    <input id="destinationCountry" type="text" name="myCountry" placeholder="City">
+                    <ul id="destinationCities"></ul>
+                  </div>
+                  <label class="cont">National Parks
+                    <input id="parksCheckbox" type="checkbox">
+                    <span class="checkmark"></span>
+                  </label>
+                  <label class="cont">Campsites
+                    <input id="campsCheckbox" type="checkbox">
+                    <span class="checkmark"></span>
+                  </label>
+                  <label class="cont">Airbnb
+                    <input id="airbnbCheckbox" type="checkbox">
+                    <span class="checkmark"></span>
+                  </label> 
+                  <br>
+                  <input id="plantrip" type="submit" value="Plan Trip!" style="width: 100%; border-radius: 10px;" onclick="hideSearch()">
+                </form>                         
+              </div>
+
+              <div id="locations" style="display: none; font-size: large; color: black;">                
+                <ul id="sortable">
+                </ul>                  
+                <button id="saveTrip" style="border-radius: 10px; height: 80px; font-size: 22px;">Save trip</button>            
+              </div>
+
+              <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+              <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+              
+              <script>
+                $( function() {
+                  $( "#sortable" ).sortable();
+                  $( "#sortable" ).disableSelection();
+                  $( "#sortable" ).on("sortupdate", function( event, ui ) {
+                    generateTrack()
+                    } );
+                  } );
+                </script>
+              
+              <script>
+                let closebtns = document.getElementsByClassName("close");                
+                for (i = 0; i < closebtns.length; i++) {
+                  closebtns[i].addEventListener("click", function() {
+                    this.parentElement.style.display = 'none';
+                  });
+                }
+              </script>
+            </div>
+          </div>
+          
+          <script>
+            document.getElementById("PopularHeadline").innerText = "Most popular trip plans for trippers from " +  localStorage.getItem("state")
+            var modal = document.getElementById('TopTripsDiv');
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function(event) {
+                if (event.target == modal)
+                  modal.style.display = "none";              
+            }        
+          </script>
+        
+          <script>
+            const state = localStorage.getItem("state")
+            $.ajax({
+              type: "GET",
+              contentType: 'application/json;charset=UTF-8',
+              url: "http://127.0.0.1:5000/trips/home_country?home_country="+ state,            
+              success: function(result) {
+                  console.log(result)
+                  createAccordion(result)
+                  designAccordion()
+              },
+              error: function() {
+                  alert('error: unable to submit');
+              },
+          });
+          </script>
+        
+          <!-- Map side -->
+          <div id="mapid" class="col-9 justify-content-center my-col">
+          </div>
+          <script src="{{ url_for('static',filename='Scripts/Map.js') }}" async></script>
+      </div>
+    </div>
+  </body>
+</html>
